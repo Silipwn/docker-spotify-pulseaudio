@@ -1,16 +1,25 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 MAINTAINER Terje Larsen
 
 # Install Spotify and PulseAudio.
 WORKDIR /usr/src
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 931FF8E79F0876134EDDBDCCA87FF9DF48BF1C90 \
-	&& echo deb http://repository.spotify.com stable non-free > /etc/apt/sources.list.d/spotify.list \
-	&& apt-get update \
-	&& apt-get install -y \
-		spotify-client xdg-utils libxss1 \
-		pulseaudio \
-		fonts-noto \
-	&& apt-get clean \
+RUN	apt-get update && apt-get install -y \
+	dirmngr \
+	gnupg \
+	--no-install-recommends \
+	&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4773BD5E130D1D45 \
+	&& echo "deb http://repository.spotify.com stable non-free" >> /etc/apt/sources.list.d/spotify.list \
+	&& apt-get update && apt-get install -y \
+        notify-osd \
+        libnotify-bin \
+	alsa-utils \
+	libgl1-mesa-dri \
+	libgl1-mesa-glx \
+	libpulse0 \
+	spotify-client \
+	xdg-utils \
+	--no-install-recommends \
+	&& rm -rf /var/lib/apt/lists/* \
 	&& echo enable-shm=no >> /etc/pulse/client.conf
 
 # Spotify data.

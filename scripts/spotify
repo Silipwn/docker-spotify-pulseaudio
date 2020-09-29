@@ -8,20 +8,27 @@ else
 	USER_GID=$(id -g)
 	xhost "si:localuser:${USER}"
 
-	[[ ${DBUS_SESSION_BUS_ADDRESS} =~ 'unix:path'\
-		 && -S ${DBUS_SESSION_BUS_ADDRESS#*=} ]]\
-		 && DBUS=${DBUS_SESSION_BUS_ADDRESS#*=}
+	#[[ ${DBUS_SESSION_BUS_ADDRESS} =~ 'unix:path'\
+		 #&& -S ${DBUS_SESSION_BUS_ADDRESS#*=} ]]\
+		 #&& DBUS=${DBUS_SESSION_BUS_ADDRESS#*=}
 
-	docker run --rm --name spotify \
+       DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+
+	docker run -d --rm --name spotify \
 		-e "USER_UID=${USER_UID}" \
 		-e "USER_GID=${USER_GID}" \
 		-e "DISPLAY=unix${DISPLAY}" \
+                -e "DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS" \
 		-v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+                -v /usr/share/fonts:/usr/share/fonts:ro \
 		-v "/run/user/${USER_UID}/pulse:/run/pulse:ro" \
 		-v "${HOME}/.spotify/config:/data/config" \
+                -v "/run/user/${USER_UID}/bus:/run/user/1000/bus" \
 		-v "${HOME}/.spotify/cache:/data/cache" \
-		${DBUS:+-v "${DBUS}:/run/dbus"} \
-		${DBUS:+-e "DBUS_SESSION_BUS_ADDRESS=/run/dbus"} \
 		--device /dev/dri \
 		spotify
 fi
+
+# Backup
+#		${DBUS:+-v "${DBUS}:/run/dbus"} \
+#		${DBUS:+-e "DBUS_SESSION_BUS_ADDRESS=/run/dbus"} \
